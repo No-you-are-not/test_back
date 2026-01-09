@@ -1,0 +1,28 @@
+### Generate a secure link
+POST http://localhost:3000/api/generate-link
+Content-Type: application/json
+
+{
+  "documentName": "2024-Q3-Statement.pdf"
+}
+
+### Redeem a link (replace TOKEN with actual token from above)
+GET http://localhost:3000/api/docs/view/TOKEN
+
+### Test with another document
+POST http://localhost:3000/api/generate-link
+Content-Type: application/json
+
+{
+  "documentName": "2023-Tax-Form-1099.pdf"
+}
+
+### Test invalid input (should return 400)
+POST http://localhost:3000/api/generate-link
+Content-Type: application/json
+
+{
+}
+
+### Test invalid token (should return 404)
+GET http://localhost:3000/api/docs/view/invalid-token-123

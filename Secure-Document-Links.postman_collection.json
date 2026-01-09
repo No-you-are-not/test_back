@@ -1,0 +1,98 @@
+{
+  "info": {
+    "name": "Secure Document Link Generator",
+    "description": "API for generating and redeeming secure, one-time-use document links",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Generate Secure Link",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documentName\": \"2024-Q3-Statement.pdf\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/generate-link",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "generate-link"]
+        },
+        "description": "Generates a secure, one-time-use link for a document"
+      },
+      "response": []
+    },
+    {
+      "name": "Redeem Secure Link",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/docs/view/:token",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "docs", "view", ":token"],
+          "variable": [
+            {
+              "key": "token",
+              "value": "PASTE_TOKEN_HERE",
+              "description": "Token from generate-link response"
+            }
+          ]
+        },
+        "description": "Redeems a secure link (works only once)"
+      },
+      "response": []
+    },
+    {
+      "name": "Test Invalid Token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/docs/view/invalid-token-123",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "docs", "view", "invalid-token-123"]
+        },
+        "description": "Tests invalid token (should return 404)"
+      },
+      "response": []
+    },
+    {
+      "name": "Test Missing Document Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/generate-link",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "generate-link"]
+        },
+        "description": "Tests validation (should return 400)"
+      },
+      "response": []
+    }
+  ]
+}
