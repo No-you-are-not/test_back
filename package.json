@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "echo 'No build needed - Bun runs TypeScript directly'",
+    "build:nest": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "bun --bun src/main.ts",
     "start:dev": "bun --bun --watch src/main.ts",
