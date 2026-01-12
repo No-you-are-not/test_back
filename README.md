@@ -116,7 +116,3 @@ Deployed on Railway. Environment variables:
 - Links are one-time use only
 - Tokens are cryptographically secure (32 random bytes)
 - Used Claude Code for scaffolding NestJS boilerplate and routes
-
-## License
-
-MIT
