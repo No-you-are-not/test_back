@@ -39,7 +39,9 @@ export class LinksService {
     // Construct full URL
     const baseUrl =
       this.configService.get<string>('BASE_URL') || 'http://localhost:3000';
-    const link = `${baseUrl}/api/docs/view/${token}`;
+    // Remove trailing slash from baseUrl if present to avoid double slashes
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const link = `${cleanBaseUrl}/docs/view/${token}`;
 
     return link;
   }
