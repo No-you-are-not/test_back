@@ -37,9 +37,11 @@ export class LinksService {
     this.linksRepository.insertLink(token, documentName);
 
     // Construct full URL
+    // BASE_URL should be the frontend URL for better UX
+    // e.g., https://your-frontend.vercel.app
     const baseUrl =
       this.configService.get<string>('BASE_URL') || 'http://localhost:3000';
-    const link = `${baseUrl}/api/docs/view/${token}`;
+    const link = `${baseUrl}/docs/view/${token}`;
 
     return link;
   }
