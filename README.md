@@ -1,101 +1,110 @@
 # Secure Document Link Generator - Backend
 
-A NestJS backend service that generates cryptographically secure, one-time-use document links. Built with TypeScript, Bun runtime, and in-memory SQLite.
+A NestJS-based API that generates cryptographically secure, one-time-use document links for sensitive files. This was built as part of a take-home technical assessment focusing on API design, security, and deployment.
 
-## Features
+## Live Demo
 
-- **Secure Link Generation**: Creates cryptographically strong tokens using 32 random bytes
-- **One-Time Use**: Links are automatically invalidated after first access
-- **In-Memory Storage**: Uses Bun's SQLite for fast, in-memory data persistence
-- **RESTful API**: Clean, well-documented API endpoints
-- **Input Validation**: Automatic request validation with class-validator
-- **CORS Enabled**: Configured for frontend integration
+- **Deployed Backend**: https://testback-production-3143.up.railway.app
+- **Frontend App**: https://test-front-rust.vercel.app
+
+## Overview
+
+I designed this backend to handle secure document sharing using one-time tokens. The main architectural decisions I made were:
+
+- **Modular architecture**: Separated concerns into database, links, and DTOs layers for maintainability
+- **In-memory SQLite**: Used Bun's built-in SQLite for fast, ephemeral storage as required
+- **Cryptographic security**: Implemented 32-byte random token generation using Node.js crypto
+- **Repository pattern**: Created a clean data access layer to keep business logic separate from database operations
+- **Input validation**: Integrated class-validator for automatic request validation
+
+I used Claude Code to help scaffold some of the NestJS boilerplate and route implementations, but the overall structure, security approach, and architectural decisions were mine.
 
 ## Tech Stack
 
-- **Runtime**: Bun (can also run with Node.js)
-- **Framework**: NestJS 10.x
+- **Runtime**: Bun (also compatible with Node.js)
+- **Framework**: NestJS 11.x
 - **Database**: Bun SQLite (in-memory)
 - **Language**: TypeScript
-- **Validation**: class-validator, class-transformer
+- **Validation**: class-validator & class-transformer
+
+## Features
+
+✅ **Secure Token Generation**: Cryptographically strong 32-byte tokens
+✅ **One-Time Use Enforcement**: Links automatically invalidate after redemption
+✅ **RESTful API Design**: Clean, intuitive endpoints
+✅ **Input Validation**: Automatic validation with descriptive error messages
+✅ **CORS Configuration**: Ready for frontend integration
+✅ **Production Ready**: Deployed and tested on Railway
 
 ## Prerequisites
 
-- Bun >= 1.0.0 (preferred) or Node.js >= 18.x
+- **Bun** >= 1.0.0 (recommended) or **Node.js** >= 18.x
 - npm or bun package manager
 
-## Installation
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-# Install dependencies with npm
-npm install
-
-# Or with Bun (if installed)
 bun install
+# or
+npm install
 ```
 
-## Configuration
+### 2. Configure Environment
 
-Create a `.env` file based on `.env.example`:
+Copy `.env.example` to `.env` and update values:
 
 ```bash
 cp .env.example .env
 ```
 
 Environment variables:
-
 - `PORT` - Server port (default: 3000)
-- `BASE_URL` - Backend URL for link generation (e.g., http://localhost:3000 or your deployed URL)
+- `BASE_URL` - Your backend URL for link generation (e.g., `https://your-app.railway.app`)
 - `NODE_ENV` - Environment mode (development/production)
 
-## Running the Application
+### 3. Run the Application
 
-### Development Mode
-
+**Development:**
 ```bash
-# With npm
-npm run start:dev
-
-# With Bun
 bun run start:dev
+# or
+npm run start:dev
 ```
 
-### Production Mode
-
+**Production:**
 ```bash
-# Build the application
-npm run build
-
-# Run in production
-npm run start:prod
-
-# Or with Bun
 bun run start:prod
+# or
+npm run start:prod
 ```
 
-The application will be available at `http://localhost:3000`
+The API will be available at `http://localhost:3000`
 
-## API Endpoints
+## API Documentation
 
-### 1. Generate Secure Link
+### Generate Secure Link
 
 **Endpoint:** `POST /api/generate-link`
 
-**Request Body:**
+Creates a secure, one-time-use link for a document.
+
+**Request:**
 ```json
 {
   "documentName": "2024-Q3-Statement.pdf"
 }
 ```
 
-**Success Response (201):**
+**Response (201):**
 ```json
 {
-  "link": "http://localhost:3000/api/docs/view/a1b2c3d4e5f6..."
+  "link": "https://your-backend.railway.app/api/docs/view/a1b2c3d4e5f6..."
 }
 ```
 
-**Error Response (400):**
+**Error (400):**
 ```json
 {
   "statusCode": 400,
@@ -104,18 +113,20 @@ The application will be available at `http://localhost:3000`
 }
 ```
 
-### 2. Redeem Secure Link
+### Redeem Secure Link
 
 **Endpoint:** `GET /api/docs/view/:token`
 
-**Success Response (200):**
+Retrieves the document name and marks the link as used. Each link can only be redeemed once.
+
+**Response (200):**
 ```json
 {
   "documentName": "2024-Q3-Statement.pdf"
 }
 ```
 
-**Error Response (404):**
+**Error (404):**
 ```json
 {
   "message": "Invalid or expired link.",
@@ -124,7 +135,7 @@ The application will be available at `http://localhost:3000`
 }
 ```
 
-**Note:** Each link can only be redeemed once. Subsequent requests will return 404.
+**Note:** Second attempt to redeem the same token will return 404.
 
 ## Testing the API
 
@@ -136,52 +147,54 @@ curl -X POST http://localhost:3000/api/generate-link \
   -H "Content-Type: application/json" \
   -d '{"documentName": "test-document.pdf"}'
 
-# Copy the token from the response and redeem it
+# Redeem the link (copy token from above response)
 curl http://localhost:3000/api/docs/view/<TOKEN>
 
-# Try to redeem again (should fail with 404)
+# Try again (should fail with 404)
 curl http://localhost:3000/api/docs/view/<TOKEN>
 ```
 
-### Using httpie
+### Using Postman
 
-```bash
-# Generate a link
-http POST http://localhost:3000/api/generate-link documentName="test-document.pdf"
-
-# Redeem the link
-http GET http://localhost:3000/api/docs/view/<TOKEN>
-```
+Import the included `Secure-Document-Links.postman_collection.json` file.
 
 ## Project Structure
+
+I organized the code into clear, modular layers:
 
 ```
 backend/
 ├── src/
-│   ├── main.ts                    # Application entry point
+│   ├── main.ts                    # App entry point & CORS config
 │   ├── app.module.ts              # Root module
 │   ├── database/                  # Database layer
-│   │   ├── database.service.ts    # SQLite initialization
-│   │   └── database.module.ts     # Database module
+│   │   ├── database.service.ts    # SQLite initialization & schema
+│   │   └── database.module.ts     # Database module setup
 │   └── links/                     # Links feature module
 │       ├── links.module.ts        # Module definition
-│       ├── links.controller.ts    # API endpoints
-│       ├── links.service.ts       # Business logic
+│       ├── links.controller.ts    # HTTP endpoints
+│       ├── links.service.ts       # Business logic & token generation
 │       ├── links.repository.ts    # Database operations
-│       ├── dto/                   # Data Transfer Objects
+│       ├── dto/                   # Request/response DTOs
 │       │   ├── generate-link.dto.ts
 │       │   └── link-response.dto.ts
 │       └── entities/
-│           └── link.entity.ts     # Link interface
-├── .env                          # Environment variables
-├── .env.example                  # Environment template
-├── package.json                  # Dependencies
+│           └── link.entity.ts     # TypeScript interface
+├── .env                          # Environment configuration
+├── package.json                  # Dependencies & scripts
 └── README.md                     # This file
 ```
 
+### Key Architecture Decisions
+
+1. **Repository Pattern**: I separated database operations into a repository layer to keep the service focused on business logic
+2. **DTOs for Validation**: Used class-validator decorators on DTOs for automatic input validation
+3. **Service Layer**: All token generation and one-time-use logic lives in the service, not the controller
+4. **Prepared Statements**: All database queries use prepared statements to prevent SQL injection
+
 ## Database Schema
 
-The in-memory SQLite database uses the following schema:
+The in-memory SQLite database uses this schema:
 
 ```sql
 CREATE TABLE links (
@@ -195,69 +208,73 @@ CREATE TABLE links (
 CREATE INDEX idx_token ON links(token);
 ```
 
+The index on `token` ensures fast lookups for redemption requests.
+
 ## Deployment
 
-### Railway (Recommended)
+### Railway (What I Used)
 
 1. Connect your GitHub repository to Railway
-2. Set environment variables:
-   - `PORT`: Will be provided by Railway
-   - `BASE_URL`: Your Railway app URL (e.g., https://your-app.railway.app)
-   - `NODE_ENV`: production
-3. Build command: `npm install && npm run build`
-4. Start command: `npm run start:prod`
+2. Add environment variables:
+   - `PORT`: Auto-provided by Railway
+   - `BASE_URL`: Your Railway app URL (e.g., `https://your-app.railway.app`)
+   - `NODE_ENV`: `production`
+3. Railway auto-detects Bun and runs `bun run start:prod`
 
 ### Alternative Platforms
 
-- **Render**: Similar setup, use Web Service
-- **Fly.io**: Use `fly launch` and configure Dockerfile
-- **DigitalOcean App Platform**: Connect repo and set build/run commands
+- **Render**: Create a Web Service, set build command to `bun install`
+- **Fly.io**: Use `fly launch` with Dockerfile
+- **DigitalOcean App Platform**: Connect repo and configure start command
 
-### Important Note
+### Important Note About In-Memory Storage
 
-Since the database is in-memory (`:memory:`), all data will be lost when the server restarts. This is expected behavior for this implementation.
+Since I used `:memory:` for SQLite (as required), all links reset when the server restarts. This is expected behavior and acceptable for this demo.
 
-## Security Features
+## Security Considerations
 
-- **Cryptographic Tokens**: Uses Node.js `crypto.randomBytes(32)` for secure token generation
-- **SQL Injection Prevention**: All queries use prepared statements
-- **Input Validation**: Automatic validation using class-validator decorators
-- **CORS**: Configured to accept requests from the frontend
+- **Cryptographic Tokens**: Using `crypto.randomBytes(32)` for secure random generation
+- **One-Time Use**: Enforced at the database level with `redeemed_at` timestamp
+- **SQL Injection Prevention**: All queries use parameterized statements
+- **Input Validation**: Automatic validation prevents invalid requests
+- **CORS**: Configured to allow frontend requests
 
 ## What I'm Proud Of
 
-- Clean, layered architecture (Controller → Service → Repository → Database)
-- Proper separation of concerns with NestJS modules
-- Type-safe implementation throughout
-- Cryptographically secure token generation
-- Simple but effective one-time use enforcement
-- Ready for production deployment
+- **Clean Architecture**: The layered approach makes the code easy to understand and extend
+- **Type Safety**: Leveraged TypeScript throughout for compile-time safety
+- **Security First**: Used proper cryptographic functions and input validation
+- **Production Ready**: Deployed and fully functional with proper error handling
+- **Simplicity**: Kept it focused on requirements without over-engineering
 
-## Assumptions
+## Design Decisions & Trade-offs
 
-- Tokens do not expire by time (only by redemption)
-- No authentication/authorization required
-- In-memory storage is acceptable (data loss on restart is expected)
-- Frontend will be deployed separately and will consume this API
+1. **No Token Expiration**: I implemented one-time use but not time-based expiration. This was a conscious choice to keep it simple for the assessment.
+
+2. **In-Memory Database**: Required by the spec. In production, I'd use PostgreSQL or MySQL for persistence.
+
+3. **No Rate Limiting**: For a production system, I'd add rate limiting on the `/api/generate-link` endpoint.
+
+4. **No Authentication**: Per requirements, this is an open API. In real-world scenarios, I'd add auth.
 
 ## Future Enhancements (Not Implemented)
 
-- Token expiration (e.g., 15-minute TTL)
+If I were to extend this beyond the requirements:
+- Time-based token expiration (15-minute TTL)
 - Rate limiting for link generation
-- Persistent database (PostgreSQL, MySQL)
-- Link analytics and usage tracking
-- User authentication
-- Comprehensive test coverage
+- Persistent database (PostgreSQL)
+- User authentication & authorization
+- Audit logging
+- Comprehensive test suite
 
-## Deployed URLs
+## Development Notes
 
-- **Backend URL**: [To be added after deployment]
-- **Frontend URL**: [To be added after deployment]
+The backend runs TypeScript directly with Bun, so there's no build step needed for development. For deployment, Bun handles TypeScript transpilation on the fly.
 
 ## License
 
 MIT
 
-## Author
+---
 
-Built as part of a take-home technical assessment.
+Built by Polina for a take-home technical assessment. Architecture and design decisions by me, with implementation assistance from Claude Code.
